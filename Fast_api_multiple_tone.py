@@ -1,4 +1,5 @@
 from fastapi import FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from dotenv import load_dotenv
 import os
@@ -25,6 +26,15 @@ class EmailRequest(BaseModel):
 # Initialize FastAPI app
 app = FastAPI()
 
+# Add CORS middleware to allow requests from https://myenexa.com
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["https://myenexa.com"],  # Update with the domain you want to allow
+    allow_credentials=True,
+    allow_methods=["*"],  # Allow all HTTP methods
+    allow_headers=["*"],  # Allow all headers
+)
+
 # Generate email content based on the prompt from Google Gemini Pro
 def generate_gemini_content(email_content, prompt):
     model = genai.GenerativeModel("gemini-pro")
@@ -41,4 +51,3 @@ async def generate_email(request: EmailRequest):
     email_body = generate_gemini_content(request.email_content, full_prompt)
     
     return {"email_body": email_body}
-
